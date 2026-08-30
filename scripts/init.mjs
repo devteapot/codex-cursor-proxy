@@ -16,7 +16,7 @@ try {
     "HOST=127.0.0.1",
     "PORT=8787",
     "DEFAULT_REASONING_EFFORT=high",
-    "MAX_CONCURRENT_REQUESTS=4",
+    "MAX_CONCURRENT_REQUESTS=0",
     ""
   ].join("\n");
   await writeFile(path, contents, { mode: 0o600, flag: "wx" });

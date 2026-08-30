@@ -20,13 +20,15 @@ function upstreamStream() {
   ].join("");
 }
 
-async function startTestServer() {
+async function startTestServer({ maxConcurrentRequests = 2, responseDelayMs = 0 } = {}) {
   const calls = [];
+  let activeUpstreamRequests = 0;
+  let peakUpstreamRequests = 0;
   const config = {
     apiKey: "test-proxy-api-key-that-is-long-enough",
     configuredModels: [],
     defaultReasoningEffort: "high",
-    maxConcurrentRequests: 2,
+    maxConcurrentRequests,
     maxRequestBytes: 1024 * 1024,
     requestTimeoutMs: 10_000
   };
@@ -39,10 +41,19 @@ async function startTestServer() {
     },
     async createResponse(body) {
       calls.push(body);
-      return new Response(upstreamStream(), {
-        status: 200,
-        headers: { "content-type": "text/event-stream" }
-      });
+      activeUpstreamRequests += 1;
+      peakUpstreamRequests = Math.max(peakUpstreamRequests, activeUpstreamRequests);
+      try {
+        if (responseDelayMs) {
+          await new Promise((resolve) => setTimeout(resolve, responseDelayMs));
+        }
+        return new Response(upstreamStream(), {
+          status: 200,
+          headers: { "content-type": "text/event-stream" }
+        });
+      } finally {
+        activeUpstreamRequests -= 1;
+      }
     }
   };
   const server = createProxyServer({ config, upstream });
@@ -51,6 +62,7 @@ async function startTestServer() {
   const address = server.address();
   return {
     calls,
+    get peakUpstreamRequests() { return peakUpstreamRequests; },
     key: config.apiKey,
     origin: `http://127.0.0.1:${address.port}`,
     close: async () => {
@@ -128,4 +140,20 @@ test("server aggregates a non-streaming Responses request", async (t) => {
   const result = await response.json();
   assert.equal(result.id, "resp_test");
   assert.equal(result.output[0].content[0].text, "hello");
+});
+
+test("zero concurrency limit allows parallel requests", async (t) => {
+  const app = await startTestServer({ maxConcurrentRequests: 0, responseDelayMs: 25 });
+  t.after(app.close);
+  const responses = await Promise.all(Array.from({ length: 8 }, () => fetch(`${app.origin}/v1/chat/completions`, {
+    method: "POST",
+    headers: {
+      authorization: `Bearer ${app.key}`,
+      "content-type": "application/json"
+    },
+    body: JSON.stringify({ model: "gpt-test", messages: [{ role: "user", content: "hi" }] })
+  })));
+
+  assert.deepEqual(responses.map((response) => response.status), Array(8).fill(200));
+  assert.ok(app.peakUpstreamRequests > 2);
 });

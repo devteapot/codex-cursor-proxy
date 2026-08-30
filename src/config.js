@@ -13,6 +13,15 @@ function positiveInt(value, fallback, name) {
   return parsed;
 }
 
+function nonNegativeInt(value, fallback, name) {
+  if (value === undefined || value === "") return fallback;
+  const parsed = Number.parseInt(value, 10);
+  if (!Number.isSafeInteger(parsed) || parsed < 0) {
+    throw new Error(`${name} must be a non-negative integer`);
+  }
+  return parsed;
+}
+
 function detectCodexVersion() {
   if (process.env.CODEX_CLIENT_VERSION) return process.env.CODEX_CLIENT_VERSION;
   const result = spawnSync("codex", ["--version"], {
@@ -54,7 +63,7 @@ export function loadConfig() {
     clientVersion: detectCodexVersion(),
     configuredModels: parseModels(process.env.CODEX_PROXY_MODELS),
     defaultReasoningEffort: process.env.DEFAULT_REASONING_EFFORT?.trim() || "high",
-    maxConcurrentRequests: positiveInt(process.env.MAX_CONCURRENT_REQUESTS, 4, "MAX_CONCURRENT_REQUESTS"),
+    maxConcurrentRequests: nonNegativeInt(process.env.MAX_CONCURRENT_REQUESTS, 0, "MAX_CONCURRENT_REQUESTS"),
     maxRequestBytes: positiveInt(process.env.MAX_REQUEST_BYTES, 20 * 1024 * 1024, "MAX_REQUEST_BYTES"),
     requestTimeoutMs: positiveInt(process.env.REQUEST_TIMEOUT_MS, 15 * 60 * 1000, "REQUEST_TIMEOUT_MS"),
     refreshSkewMs: positiveInt(process.env.REFRESH_SKEW_MS, 5 * 60 * 1000, "REFRESH_SKEW_MS"),

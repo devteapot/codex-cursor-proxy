@@ -165,7 +165,7 @@ Copy `.env.example` for the full list. Common settings:
 | `CODEX_AUTH_FILE` | `~/.codex/auth.json` | Existing Codex CLI login |
 | `CODEX_PROXY_MODELS` | dynamic | Optional comma-separated model allowlist |
 | `DEFAULT_REASONING_EFFORT` | `high` | Default when the client omits reasoning effort |
-| `MAX_CONCURRENT_REQUESTS` | `4` | Process-wide in-flight request limit |
+| `MAX_CONCURRENT_REQUESTS` | `0` | Process-wide in-flight request limit; `0` disables it |
 | `MAX_REQUEST_BYTES` | `20971520` | Maximum JSON body size |
 
 You may supply `CODEX_ACCESS_TOKEN` and `CODEX_ACCOUNT_ID` instead of an auth file, but an access token cannot be automatically refreshed. Never put either value in Cursor settings.

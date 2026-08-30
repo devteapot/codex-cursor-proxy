@@ -141,7 +141,7 @@ export function createProxyServer({ config, upstream }) {
       if (request.method !== "POST" || !["/v1/responses", "/v1/chat/completions"].includes(url.pathname)) {
         throw new HttpError(404, "Route not found.", "not_found");
       }
-      if (activeRequests >= config.maxConcurrentRequests) {
+      if (config.maxConcurrentRequests > 0 && activeRequests >= config.maxConcurrentRequests) {
         throw new HttpError(429, "The proxy concurrency limit has been reached.", "rate_limit_exceeded", "rate_limit_error");
       }
 
