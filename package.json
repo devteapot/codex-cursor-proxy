@@ -1,0 +1,33 @@
+{
+  "name": "codex-cursor-proxy",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Experimental OpenAI-compatible proxy from Cursor Glass to a local Codex subscription session",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "init": "node scripts/init.mjs",
+    "start": "node --env-file-if-exists=.env src/server.js",
+    "service:install": "node scripts/service.mjs install",
+    "service:start": "node scripts/service.mjs start",
+    "service:stop": "node scripts/service.mjs stop",
+    "service:restart": "node scripts/service.mjs restart",
+    "service:status": "node scripts/service.mjs status",
+    "service:logs": "node scripts/service.mjs logs",
+    "service:uninstall": "node scripts/service.mjs uninstall",
+    "tunnel:configure": "node scripts/tunnel-service.mjs configure",
+    "tunnel:configure-cli": "node scripts/tunnel-service.mjs configure-cli",
+    "tunnel:install": "node scripts/tunnel-service.mjs install",
+    "tunnel:start": "node scripts/tunnel-service.mjs start",
+    "tunnel:stop": "node scripts/tunnel-service.mjs stop",
+    "tunnel:restart": "node scripts/tunnel-service.mjs restart",
+    "tunnel:status": "node scripts/tunnel-service.mjs status",
+    "tunnel:logs": "node scripts/tunnel-service.mjs logs",
+    "tunnel:uninstall": "node scripts/tunnel-service.mjs uninstall",
+    "test": "node --test",
+    "check": "node --check src/server.js && node --check src/auth.js && node --check src/translate.js && node --check scripts/service.mjs && node --check scripts/tunnel-service.mjs && node --test"
+  },
+  "license": "MIT"
+}

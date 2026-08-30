@@ -1,0 +1,6 @@
+.env
+.cloudflared-token
+.DS_Store
+node_modules/
+coverage/
+*.log
